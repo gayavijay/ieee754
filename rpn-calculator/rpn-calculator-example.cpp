@@ -17,7 +17,7 @@ using namespace std;
  * *** STUDENTS WILL NEED TO CHANGE INPUT_CSV_FILE PATH BELOW TO POINT TO THE rpn-input.csv FILE ***
  * *** ON THEIR LAPTOP/COMPUTER ***
  */
-#define INPUT_CSV_FILE "/Users/gayathrivijay/Downloads/rpn-bitwise-calculator/rpn-input.csv"
+#define INPUT_CSV_FILE "/Users/gayathrivijay/Downloads/HelloWorld/rpn-calculator/rpn-input.csv"
 
 // test controls
 #define MIN_VALUE 0
@@ -49,9 +49,30 @@ uint8_t const width = 16U;
  */
 shared_ptr<uint16_t> rpn_calc(command const cmd, uint16_t const value = 0) {
     // this is example code which returns a (smart shared) pointer to 16-bit value
-    uint16_t val = 0b1001100100000011;
-    shared_ptr<uint16_t> result = make_shared<uint16_t>(val);
-    return result;
+    static vector<uint16_t> stack;
+
+    switch (cmd){
+        case cmd_enter:
+        stack.push_back(value);
+        break;
+
+        case cmd_clear:
+        stack.clear();
+        break;
+
+        case cmd_pop:
+        if(!stack.empty()){
+            stack.pop_back();
+        }
+        break;
+
+        case cmd_top:
+        if(!stack.empty()){
+            return make_shared<uint16_t>(stack.back());
+        } else {
+            return nullptr;
+        }
+    }
 }
 
 /*
