@@ -53,25 +53,58 @@ shared_ptr<uint16_t> rpn_calc(command const cmd, uint16_t const value = 0) {
 
     switch (cmd){
         case cmd_enter:
-        stack.push_back(value);
-        break;
+            stack.push_back(value);
+            break;
 
         case cmd_clear:
-        stack.clear();
-        break;
+            stack.clear();
+            break;
 
         case cmd_pop:
-        if(!stack.empty()){
-            stack.pop_back();
-        }
-        break;
+            if(!stack.empty()){
+                stack.pop_back();
+            }
+            break;
 
         case cmd_top:
-        if(!stack.empty()){
-            return make_shared<uint16_t>(stack.back());
-        } else {
-            return nullptr;
-        }
+            if(!stack.empty()){
+                return make_shared<uint16_t>(stack.back());
+            } else {
+                return nullptr;
+            }
+
+        case cmd_add:
+            if (stack.size() >= 2){
+                uint16_t x = stack.back(); 
+                stack.pop_back();
+                uint16_t y = stack.back(); 
+                stack.pop_back();
+                stack.push_back(x+y);
+                return make_shared<uint16_t>(stack.back());
+            }
+            break;
+
+        case cmd_or:
+            if(stack.size() >= 2){
+                uint16_t x = stack.back(); 
+                stack.pop_back();
+                uint16_t y = stack.back(); 
+                stack.pop_back();
+                stack.push_back(x | y);
+                return make_shared<uint16_t>(stack.back());
+            }
+            break;
+
+        case cmd_and:
+             if(stack.size() >= 2){
+                uint16_t x = stack.back(); 
+                stack.pop_back();
+                uint16_t y = stack.back(); 
+                stack.pop_back();
+                stack.push_back(x & y);
+                return make_shared<uint16_t>(stack.back());
+            }
+            break;
     }
 }
 
