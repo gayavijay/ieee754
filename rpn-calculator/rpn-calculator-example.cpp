@@ -74,7 +74,7 @@ shared_ptr<uint16_t> rpn_calc(command const cmd, uint16_t const value = 0) {
             }
 
         case cmd_add:
-            if (stack.size() >= 2){
+            if(stack.size() >= 2){
                 uint16_t x = stack.back(); 
                 stack.pop_back();
                 uint16_t y = stack.back(); 
@@ -105,6 +105,29 @@ shared_ptr<uint16_t> rpn_calc(command const cmd, uint16_t const value = 0) {
                 return make_shared<uint16_t>(stack.back());
             }
             break;
+        
+        case cmd_left_shift:
+            if(!stack.empty()){
+                stack.back() >>= 1;
+                return make_shared<uint16_t>(stack.back());
+            }
+            break;
+
+        case cmd_right_shift:
+            if(!stack.empty()){
+                stack.back() >>= 1;
+                return make_shared<uint16_t>(stack.back());
+            }
+            break;
+
+        default:
+        return nullptr; 
+    }
+
+    if(!stack.empty()){
+        return make_shared<uint16_t>(stack.back());
+    } else {
+        return nullptr;
     }
 }
 
