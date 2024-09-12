@@ -47,45 +47,56 @@ uint8_t const width = 16U;
  * Students should create or add any data structures needed.
  * Students should create or add any functions or classes they may need.
  */
+
 shared_ptr<uint16_t> rpn_calc(command const cmd, uint16_t const value = 0) {
-    // this is example code which returns a (smart shared) pointer to 16-bit value
     static vector<uint16_t> stack;
 
-    switch (cmd){
+    switch (cmd) {
         case cmd_enter:
             stack.push_back(value);
+            break;
+        
+        case cmd_pop:
+            if (!stack.empty()) {
+                stack.pop_back();
+            }
+            if (stack.empty()) {
+                return nullptr;
+            }
+            return make_shared<uint16_t>(stack.back());
             break;
 
         case cmd_clear:
             stack.clear();
             break;
 
-        case cmd_pop:
-            if(!stack.empty()){
-                stack.pop_back();
-            }
-            break;
-
         case cmd_top:
-            if(!stack.empty()){
+            if (!stack.empty()) {
                 return make_shared<uint16_t>(stack.back());
             } else {
                 return nullptr;
             }
-
-        case cmd_add:
-            if(stack.size() >= 2){
-                uint16_t x = stack.back(); 
-                stack.pop_back();
-                uint16_t y = stack.back(); 
-                stack.pop_back();
-                stack.push_back(x+y);
-                return make_shared<uint16_t>(stack.back());
-            }
             break;
 
+        case cmd_add:
+            if (stack.size() >= 2) {
+                uint16_t x = stack.back();
+                stack.pop_back();
+                uint16_t y = stack.back();
+                stack.pop_back();
+        
+                uint32_t result = static_cast<uint32_t>(x) + static_cast<uint32_t>(y);
+                    if (result > UINT16_MAX) {
+                        stack.push_back(result % (UINT16_MAX + 1)); 
+                    } else {
+                        stack.push_back(static_cast<uint16_t>(result));
+                    }
+            return make_shared<uint16_t>(stack.back());
+            }
+        break;
+
         case cmd_or:
-            if(stack.size() >= 2){
+            if (stack.size() >= 2) {
                 uint16_t x = stack.back(); 
                 stack.pop_back();
                 uint16_t y = stack.back(); 
@@ -96,40 +107,43 @@ shared_ptr<uint16_t> rpn_calc(command const cmd, uint16_t const value = 0) {
             break;
 
         case cmd_and:
-             if(stack.size() >= 2){
-                uint16_t x = stack.back(); 
+            if (stack.size() >= 2) {
+                uint16_t x = stack.back();
                 stack.pop_back();
-                uint16_t y = stack.back(); 
+                uint16_t y = stack.back();
                 stack.pop_back();
-                stack.push_back(x & y);
+                stack.push_back(x & y); 
                 return make_shared<uint16_t>(stack.back());
             }
-            break;
-        
+        break;
+
         case cmd_left_shift:
-            if(!stack.empty()){
-                stack.back() >>= 1;
+            if (!stack.empty()) {
+                uint16_t x = stack.back();
+                stack.back() = x << value; 
                 return make_shared<uint16_t>(stack.back());
             }
-            break;
+        break;
 
         case cmd_right_shift:
-            if(!stack.empty()){
-                stack.back() >>= 1;
+            if (!stack.empty()) {
+                uint16_t x = stack.back();
+                stack.back() = x >> value; 
                 return make_shared<uint16_t>(stack.back());
             }
-            break;
+        break;
 
         default:
-        return nullptr; 
+            return nullptr; 
     }
 
-    if(!stack.empty()){
+    if (!stack.empty()) {
         return make_shared<uint16_t>(stack.back());
     } else {
         return nullptr;
     }
 }
+
 
 /*
  * *** STUDENTS SHOULD NOT NEED TO CHANGE THE CODE BELOW. IT IS A CUSTOM TEST HARNESS. ***
