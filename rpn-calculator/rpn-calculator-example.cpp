@@ -49,140 +49,154 @@ uint8_t const width = 16U;
  * Students should create or add any functions or classes they may need.
  */
 
+    shared_ptr<uint16_t> rpn_calc(command const cmd, uint16_t const value = 0) {
+        uint16_t val = 0b1001100100000011;
+        shared_ptr<uint16_t> result = make_shared<uint16_t>(val);
+        stack<uint16_t> stack;
+        stack<uint16_t> backup_stack = stack;
 
-shared_ptr<uint16_t> rpn_calc(command const cmd, uint16_t const value = 0) {
-    uint16_t val = 0b1001100100000011;
-    shared_ptr<uint16_t> result = make_shared<uint16_t>(val);
-    static stack<uint16_t> stack;
 
         switch (cmd) {
-        case cmd_enter:
-            stack.push(value);
-            result = make_shared<uint16_t>(value);
-            break;
+            case cmd_enter:
+                stack.push(value);
+                result = make_shared<uint16_t>(value);
+                backup_stack = stack;
+                break;
 
-        case cmd_clear:
-            while (!stack.empty()) {
-                stack.pop();
-            }
-            return nullptr;
-
-        case cmd_pop:
-            if (stack.empty()) {
+            case cmd_clear:
+                while (!stack.empty()) {
+                    stack.pop();
+                }
+                backup_stack = stack;
                 return nullptr;
-            } else {
-                stack.pop();
+
+            case cmd_pop:
+                if (stack.empty()) {
+                    return nullptr;
+                } else {
+                    stack.pop();
+                    if (stack.empty()) {
+                        return nullptr;
+                    } else {
+                        result = make_shared<uint16_t>(stack.top());
+                        backup_stack = stack;
+                    }
+                }
+                break;
+
+            case cmd_top:
                 if (stack.empty()) {
                     return nullptr;
                 } else {
                     result = make_shared<uint16_t>(stack.top());
+                    backup_stack = stack;
                 }
-            }
-            break;
-
-        case cmd_top:
-            if (stack.empty()) {
-                return nullptr;
-            } else {
-                result = make_shared<uint16_t>(stack.top());
-            }
                 break;
-        
-        case cmd_left_shift:
-            if (stack.size() < 2) {
-                return nullptr; // Not enough elements
-            }
-            {
-                uint16_t first_element = stack.top();
-                stack.pop();
-                uint16_t second_element = stack.top();
-                stack.pop();
-                uint16_t result_of_left_shift = second_element << first_element;
-                stack.push(result_of_left_shift);
-                result = make_shared<uint16_t>(result_of_left_shift);
-            }
-            break;
 
-        case cmd_right_shift:
-            if (stack.size() < 2) {
-                return nullptr; // Not enough elements
-            }
-            {
-                uint16_t first_element = stack.top();
-                stack.pop();
-                uint16_t second_element = stack.top();
-                stack.pop();
-                uint16_t result_of_right_shift = second_element >> first_element;
-                stack.push(result_of_right_shift);
-                result = make_shared<uint16_t>(result_of_right_shift);
-            }
-            break;
+            case cmd_left_shift:
+                if (stack.size() < 2) {
+                    return nullptr; // Not enough elements
+                } {
+                    uint16_t first_element = stack.top();
+                    stack.pop();
+                    uint16_t second_element = stack.top();
+                    stack.pop();
+                    uint16_t result_of_left_shift = second_element << first_element;
+                    stack.push(result_of_left_shift);
+                    backup_stack = stack;
+                    result = make_shared<uint16_t>(result_of_left_shift);
+                }
+                break;
 
-        case cmd_or:
-            if (stack.size() < 2) {
+            case cmd_right_shift:
+                if (stack.size() < 2) {
+                    return nullptr; // Not enough elements
+                } {
+                    uint16_t first_element = stack.top();
+                    stack.pop();
+                    uint16_t second_element = stack.top();
+                    stack.pop();
+                    uint16_t result_of_right_shift = second_element >> first_element;
+                    stack.push(result_of_right_shift);
+                    backup_stack = stack;
+                    result = make_shared<uint16_t>(result_of_right_shift);
+                }
+                break;
+
+            case cmd_or:
+                if (stack.size() < 2) {
+                    return nullptr;
+                } else {
+                    uint16_t first_element = stack.top();
+                    stack.pop();
+                    uint16_t second_element = stack.top();
+                    stack.pop();
+                    uint16_t result_of_or = first_element | second_element;
+                    stack.push(result_of_or);
+                    backup_stack = stack;
+                    result = make_shared<uint16_t>(result_of_or);
+                }
+                break;
+
+            case cmd_and:
+                if (stack.size() < 2) {
+                    return nullptr; // Not enough elements
+                } {
+                    uint16_t first_element = stack.top();
+                    stack.pop();
+                    uint16_t second_element = stack.top();
+                    stack.pop();
+                    uint16_t result_of_and = first_element & second_element;
+                    stack.push(result_of_and);
+                    backup_stack = stack;
+                    result = make_shared<uint16_t>(result_of_and);
+                }
+                break;
+
+            case cmd_add:
+
+                    if (stack.size() >= 2)
+                    {
+                        uint16_t a = stack.top();
+                        stack.pop();
+                        uint16_t b = stack.top();
+                        stack.pop();
+
+                        uint16_t sum = a ^ b;
+
+                        uint16_t carry = (a & b) << 1;
+
+                        while (carry != 0)
+                        {
+                            uint16_t temp = sum;
+                            sum = sum ^ carry;
+                            carry = (temp & carry) << 1;
+                        }
+
+                        if (sum < a || sum < b)
+                        {
+
+                            stack = backup_stack;
+                            return nullptr;
+                        }
+
+                        stack.push(sum);
+                        backup_stack = stack; 
+                        return make_shared<uint16_t>(stack.top());
+                    }
+
+
+            default:
+                cout << "ERROR: Unknown command" << endl;
                 return nullptr;
-            } else {
-                uint16_t first_element = stack.top();
-                stack.pop();
-                uint16_t second_element = stack.top();
-                stack.pop();
-                uint16_t result_of_or = first_element | second_element;
-                stack.push(result_of_or);
-                result = make_shared<uint16_t>(result_of_or);
-            }
-            break;
+        }
 
-        case cmd_and: 
-            if (stack.size() < 2) {
-                return nullptr; // Not enough elements
-            }
-            {
-                uint16_t first_element = stack.top();
-                stack.pop();
-                uint16_t second_element = stack.top();
-                stack.pop();
-                uint16_t result_of_and = first_element & second_element;
-                stack.push(result_of_and);
-                result = make_shared<uint16_t>(result_of_and);
-            }
-            break;
-
-        case cmd_add:
-            if (stack.size() < 2) {
-                return nullptr; // Not enough elements
-            }
-            {
-                uint16_t a = stack.top();
-                stack.pop();
-                uint16_t b = stack.top();
-                stack.pop();
-
-                // Perform bitwise addition
-                while (b != 0) {
-                    uint16_t carry = a & b; 
-                    a = a ^ b;                
-                    b = carry << 1;             
-                }
-
-                if (a > 0xFFFF) {
-                    return nullptr; 
-                }
-
-                stack.push(a);
-                result = make_shared<uint16_t>(a);
-            }
-            break;
-
-        default:
-            cout << "ERROR: Unknown command" << endl;
+        if (!stack.empty()) {
+            return result;
+        } else {
             return nullptr;
+        }
     }
-    if (!stack.empty()) {
-        return result;
-    } else {
-        return nullptr;
-    }
-}
 
 /*
  * *** STUDENTS SHOULD NOT NEED TO CHANGE THE CODE BELOW. IT IS A CUSTOM TEST HARNESS. ***
