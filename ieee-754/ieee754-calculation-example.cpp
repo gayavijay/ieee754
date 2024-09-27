@@ -31,16 +31,12 @@ float ieee_754(uint32_t const data) {
     int exponent = ((data >> 23) & 0xFF) - bias;
 
     uint32_t mantissa = data & 0x7FFFFF;
-    
-    float normalized_mantissa = 1.0f + mantissa / static_cast<float>(1 << 23);
 
-    float value = normalized_mantissa * pow(2.0f, exponent);
-    
-    if (sign == 1) {
-        return -value;
-    } else {
-        return value;
-    }
+    float normalized_mantissa = 1.0f + (mantissa / static_cast<float>(1 << 23));
+
+    float value = normalized_mantissa * static_cast<float>(1 << exponent);
+
+    return (sign == 1) ? -value : value;
 }
 
 /*
