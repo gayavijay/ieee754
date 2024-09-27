@@ -26,23 +26,21 @@ uint8_t const bias = 127U;
  * Students should create or add any functions or classes they may need.
  */
 float ieee_754(uint32_t const data) {
-    // Extract the sign (1 bit)
     int sign = (data >> 31) & 0x1;
 
-    // Extract the exponent (8 bits)
     int exponent = ((data >> 23) & 0xFF) - bias;
 
-    // Extract the mantissa (23 bits)
     uint32_t mantissa = data & 0x7FFFFF;
     
-    // Add the implicit leading 1 for normalized numbers
     float normalized_mantissa = 1.0f + mantissa / static_cast<float>(1 << 23);
 
-    // Compute the final floating-point value
     float value = normalized_mantissa * pow(2.0f, exponent);
     
-    // Apply the sign
-    return value;
+    if (sign == 1) {
+        return -value;
+    } else {
+        return value;
+    }
 }
 
 /*
